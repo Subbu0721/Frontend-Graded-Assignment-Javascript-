@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicant Details</title>
+    <style>
+        
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            margin-top: 50px;
+        }
+
+        .navigation-buttons {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+        }
+
+        .message-box {
+            border: 2px solid black;
+            background-color: white;
+            padding: 30px;
+         
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 16px;
+            max-width: 50%;
+        }
+
+        .search-container input {
+            flex-grow: 1;
+        }
+
+        .search-container .navigation-buttons {
+            margin-left: 10px;
+        }
+
+        #applicantDetails {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body onload="fetchApplicants()">
+
+    <div class="search-container">
+        <div>
+            <label for="searchInput"></label>
+            <input type="text" id="searchInput" oninput="searchApplicants()">
+        </div>
+        <div class="navigation-buttons" style="display: none;">
+            <button id="previousBtn" onclick="showPrevious()">Previous</button>
+            <button id="nextBtn" onclick="showNext()">Next</button>
+        </div>
+    </div>
+
+    <div id="applicantDetails"></div>
+
+    <div class="message-box" id="noApplicantsBox" style="display: none;">
+        <div style="display: flex; align-items: center;">
+            <p style="font-size: 100px; margin-right: 20px;">🙁</p>
+            <span>No such results found</span>
+        </div>
+    </div>
+
+    <script>
+        let applicants = [];
+        let filteredApplicants = [];
+        let currentIndex = 0; 
+
+        async function fetchApplicants() {
+            const response = await fetch('Data.json');
+            applicants = await response.json();
+            displayApplicant(currentIndex);
+        }
+
+        function displayApplicant(index) {
+            const applicantDetails = document.getElementById('applicantDetails');
+            const noApplicantsBox = document.getElementById('noApplicantsBox');
+            if (filteredApplicants.length > 0) {
+                const applicant = filteredApplicants[index];
+                applicantDetails.innerHTML = `
+                <h2>${applicant.name}</h2>
+                <p>Job Title: ${applicant.jobTitle}</p>
+                <p>Experience: ${applicant.experience}</p>
+                <p>Location: ${applicant.location}</p>
+            `;
+                document.querySelector('.navigation-buttons').style.display = 'block';
+                noApplicantsBox.style.display = 'none'; 
+                if (currentIndex > 0) {
+                    document.getElementById('previousBtn').style.display = 'inline-block'; 
+                } else {
+                    document.getElementById('previousBtn').style.display = 'none';
+                }
+            } else {
+                applicantDetails.innerHTML = ''; 
+                document.querySelector('.navigation-buttons').style.display = 'none';
+                noApplicantsBox.style.display = 'block'; 
+            }
+        }
+
+        function searchApplicants() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            filteredApplicants = applicants.filter(applicant =>
+                applicant.jobTitle.toLowerCase().includes(searchInput)
+            );
+            currentIndex = 0;
+            displayApplicant(currentIndex);
+        }
+
+        function showNext() {
+            if (currentIndex < filteredApplicants.length - 1) {
+                currentIndex++;
+                displayApplicant(currentIndex);
+            }
+        }
+
+        function showPrevious() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                displayApplicant(currentIndex);
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
